@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4bbd9670-3dab-48f9-b862-8a533b495608" name="Default Changelist" comment="" />
+    <list default="true" id="4bbd9670-3dab-48f9-b862-8a533b495608" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ripemd160.go" beforeDir="false" afterPath="$PROJECT_DIR$/ripemd160.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ripemd160_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/ripemd160_test.go" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,8 +32,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ripemd160.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="66">
-              <caret line="726" column="19" lean-forward="true" selection-start-line="726" selection-start-column="19" selection-end-line="726" selection-end-column="19" />
+            <state relative-caret-position="19">
+              <caret line="119" column="15" lean-forward="true" selection-start-line="119" selection-start-column="15" selection-end-line="119" selection-end-column="15" />
               <folding>
                 <element signature="e#16#58#0" expanded="true" />
               </folding>
@@ -37,10 +42,19 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://C:/Go/src/encoding/binary/varint.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="108">
+              <caret line="43" selection-start-line="43" selection-end-line="43" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ripemd160_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="131">
-              <caret line="11" column="20" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+            <state relative-caret-position="263">
+              <caret line="15" column="39" lean-forward="true" selection-start-line="15" selection-start-column="39" selection-end-line="15" selection-end-column="39" />
               <folding>
                 <element signature="e#16#53#0" expanded="true" />
               </folding>
@@ -66,15 +80,27 @@
       <find>buffer</find>
       <find>Transform</find>
       <find>TransformBloc</find>
+      <find>TransformBytes</find>
+      <find>byte2</find>
+      <find>fin</find>
+      <find>bytes2</find>
+      <find>strptr</find>
+      <find>PutUvarint</find>
     </findStrings>
+    <replaceStrings>
+      <replace>LittleEndian.PutUint64</replace>
+    </replaceStrings>
   </component>
   <component name="GOROOT" path="C:\Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/ripemd_test.go" />
-        <option value="$PROJECT_DIR$/ripemd160_test.go" />
         <option value="$PROJECT_DIR$/ripemd160.go" />
+        <option value="$PROJECT_DIR$/ripemd160_test.go" />
       </list>
     </option>
   </component>
@@ -84,6 +110,7 @@
     <option name="width" value="1296" />
     <option name="height" value="776" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -167,34 +194,34 @@
     </recent_temporary>
   </component>
   <component name="TestHistory">
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 19m 20s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 18m 28s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 21m 12s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 20m 05s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 22m 36s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 20m 30s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 22m 55s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 20m 49s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 25m 24s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 21m 30s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 29m 02s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 22m 08s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 30m 12s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 23m 21s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 30m 35s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 24m 40s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 31m 07s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 25m 08s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_go-ripemd - 2019.03.26 at 19h 32m 53s.xml">
+    <history-entry file="go_test_go-ripemd - 2019.03.26 at 21h 26m 25s.xml">
       <configuration name="go test go-ripemd" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
@@ -203,7 +230,7 @@
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24962178" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24962178" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" />
@@ -212,7 +239,7 @@
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3289689" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.41898528" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.41967213" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -241,10 +268,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://C:/Go/src/encoding/binary/varint.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="43" selection-start-line="43" selection-end-line="43" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ripemd160_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="131">
-          <caret line="11" column="20" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+        <state relative-caret-position="263">
+          <caret line="15" column="39" lean-forward="true" selection-start-line="15" selection-start-column="39" selection-end-line="15" selection-end-column="39" />
           <folding>
             <element signature="e#16#53#0" expanded="true" />
           </folding>
@@ -253,8 +287,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ripemd160.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="66">
-          <caret line="726" column="19" lean-forward="true" selection-start-line="726" selection-start-column="19" selection-end-line="726" selection-end-column="19" />
+        <state relative-caret-position="19">
+          <caret line="119" column="15" lean-forward="true" selection-start-line="119" selection-start-column="15" selection-end-line="119" selection-end-column="15" />
           <folding>
             <element signature="e#16#58#0" expanded="true" />
           </folding>

@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/bamiaux/iobit"
-	"math/bits"
 )
 
 const (
@@ -15,7 +13,7 @@ const (
 
 	// The block size of the hash algorithm in bytes.
 	Ripemd160BlockSize = 64 // a_block_size
-	Ripemd160HashSize = 5 // a_hash_size
+	Ripemd160HashSize  = 5  // a_hash_size
 
 	C1 = uint32(0x50A28BE6)
 	C2 = uint32(0x5A827999)
@@ -28,12 +26,12 @@ const (
 )
 
 type Ripemd160 struct {
-	state           [5]uint32                // running context
+	state [5]uint32 // running context
 	//buffer          [Ripemd160BlockSize]byte // tempary buffer
 	//nx              int                      // index into buffer
-	buffer   *bytes.Buffer
+	buffer *bytes.Buffer
 
-	processed_bytes uint64                   // total count of bytes processed
+	processed_bytes uint64 // total count of bytes processed
 }
 
 func New160() *Ripemd160 {
@@ -57,686 +55,355 @@ func (r *Ripemd160) BlockSize() int {
 	return Ripemd160BlockSize
 }
 
-func (r *Ripemd160) TransformBlock(in []byte) []byte {
-	var a, b, c, d, e uint32
-	var data []uint32
-	a = r.state[0]
-	b = r.state[1]
-	c = r.state[2]
-	d = r.state[3]
-	e = r.state[4]
-	aa := a
-	bb := b
-	cc := c
-	dd := d
-	ee := e
-
-	//length := int(len(in) / 4)
-	//if len(in) % 4 != 0{
-	//	length ++
-	//}
-	//var data [16]uint32
-	//var indata [4*16]byte
-	//copy(indata, in)
-
-	//for i:=0; i<16; i=i+1{
-	//	if len(in) > 4 && 4*i+4 < 64 {
-	//		//fmt.Println(in[4*i: 4*i+3])
-	//		key := binary.LittleEndian.Uint32(in[:4])
-	//		data[i] = key
-	//	}else {
-	//		data[i] = binary.LittleEndian.Uint32(in[:])
-	//	}
-	//}
-
-	//dataWritter := iobit.NewWriter(data)
-
-	inReader := iobit.NewReader(in)
-	data = make([]uint32, 0)
-	for i:=0; inReader.LeftBits() != 0; i++ {
-		 data = append(data, inReader.Le32())
-	}
-	for len(data) < Ripemd160Size {
-		data = append(data, 0x0)
-	}
-
-	a = a + (data[0] + (b ^ c ^ d))
-	a = bits.RotateLeft32(a, 11) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[1] + (a ^ b ^ c))
-	e = bits.RotateLeft32(e, 14) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[2] + (e ^ a ^ b))
-	d = bits.RotateLeft32(d, 15) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[3] + (d ^ e ^ a))
-	c = bits.RotateLeft32(c, 12) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[4] + (c ^ d ^ e))
-	b = bits.RotateLeft32(b, 5) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[5] + (b ^ c ^ d))
-	a = bits.RotateLeft32(a, 8) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[6] + (a ^ b ^ c))
-	e = bits.RotateLeft32(e, 7) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[7] + (e ^ a ^ b))
-	d = bits.RotateLeft32(d, 9) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[8] + (d ^ e ^ a))
-	c = bits.RotateLeft32(c, 11) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[9] + (c ^ d ^ e))
-	b = bits.RotateLeft32(b, 13) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[10] + (b ^ c ^ d))
-	a = bits.RotateLeft32(a, 14) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[11] + (a ^ b ^ c))
-	e = bits.RotateLeft32(e, 15) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[12] + (e ^ a ^ b))
-	d = bits.RotateLeft32(d, 6) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[13] + (d ^ e ^ a))
-	c = bits.RotateLeft32(c, 7) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[14] + (c ^ d ^ e))
-	b = bits.RotateLeft32(b, 9) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[15] + (b ^ c ^ d))
-	a = bits.RotateLeft32(a, 8) + e
-	c = bits.RotateLeft32(c, 10)
-
-
-
-	aa = aa + (data[5] + C1 + (bb ^ (cc | ^dd)))
-	aa = bits.RotateLeft32(aa, 8) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[14] + C1 + (aa ^ (bb | ^cc)))
-	ee = bits.RotateLeft32(ee, 9) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[7] + C1 + (ee ^ (aa | ^bb)))
-	dd = bits.RotateLeft32(dd, 9) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[0] + C1 + (dd ^ (ee | ^aa)))
-	cc = bits.RotateLeft32(cc, 11) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[9] + C1 + (cc ^ (dd | ^ee)))
-	bb = bits.RotateLeft32(bb, 13) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[2] + C1 + (bb ^ (cc | ^dd)))
-	aa = bits.RotateLeft32(aa, 15) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[11] + C1 + (aa ^ (bb | ^cc)))
-	ee = bits.RotateLeft32(ee, 15) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[4] + C1 + (ee ^ (aa | ^bb)))
-	dd = bits.RotateLeft32(dd, 5) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[13] + C1 + (dd ^ (ee | ^aa)))
-	cc = bits.RotateLeft32(cc, 7) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[6] + C1 + (cc ^ (dd | ^ee)))
-	bb = bits.RotateLeft32(bb, 7) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[15] + C1 + (bb ^ (cc | ^dd)))
-	aa = bits.RotateLeft32(aa, 8) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[8] + C1 + (aa ^ (bb | ^cc)))
-	ee = bits.RotateLeft32(ee, 11) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[1] + C1 + (ee ^ (aa | ^bb)))
-	dd = bits.RotateLeft32(dd, 14) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[10] + C1 + (dd ^ (ee | ^aa)))
-	cc = bits.RotateLeft32(cc, 14) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[3] + C1 + (cc ^ (dd | ^ee)))
-	bb = bits.RotateLeft32(bb, 12) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[12] + C1 + (bb ^ (cc | ^dd)))
-	aa = bits.RotateLeft32(aa, 6) + ee
-	cc = bits.RotateLeft32(cc, 10)
-
-	e = e + (data[7] + C2 + ((a & b) | (^a & c)))
-	e = bits.RotateLeft32(e, 7) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[4] + C2 + ((e & a) | (^e & b)))
-	d = bits.RotateLeft32(d, 6) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[13] + C2 + ((d & e) | (^d & a)))
-	c = bits.RotateLeft32(c, 8) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[1] + C2 + ((c & d) | (^c & e)))
-	b = bits.RotateLeft32(b, 13) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[10] + C2 + ((b & c) | (^b & d)))
-	a = bits.RotateLeft32(a, 11) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[6] + C2 + ((a & b) | (^a & c)))
-	e = bits.RotateLeft32(e, 9) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[15] + C2 + ((e & a) | (^e & b)))
-	d = bits.RotateLeft32(d, 7) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[3] + C2 + ((d & e) | (^d & a)))
-	c = bits.RotateLeft32(c, 15) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[12] + C2 + ((c & d) | (^c & e)))
-	b = bits.RotateLeft32(b, 7) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[0] + C2 + ((b & c) | (^b & d)))
-	a = bits.RotateLeft32(a, 12) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[9] + C2 + ((a & b) | (^a & c)))
-	e = bits.RotateLeft32(e, 15) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[5] + C2 + ((e & a) | (^e & b)))
-	d = bits.RotateLeft32(d, 9) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[2] + C2 + ((d & e) | (^d & a)))
-	c = bits.RotateLeft32(c, 11) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[14] + C2 + ((c & d) | (^c & e)))
-	b = bits.RotateLeft32(b, 7) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[11] + C2 + ((b & c) | (^b & d)))
-	a = bits.RotateLeft32(a, 13) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[8] + C2 + ((a & b) | (^a & c)))
-	e = bits.RotateLeft32(e, 12) + d
-	b = bits.RotateLeft32(b, 10)
-
-	ee = ee + (data[6] + C3 + ((aa & cc) | (bb & ^cc)))
-	ee = bits.RotateLeft32(ee, 9) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[11] + C3 + ((ee & bb) | (aa & ^bb)))
-	dd = bits.RotateLeft32(dd, 13) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[3] + C3 + ((dd & aa) | (ee & ^aa)))
-	cc = bits.RotateLeft32(cc, 15) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[7] + C3 + ((cc & ee) | (dd & ^ee)))
-	bb = bits.RotateLeft32(bb, 7) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[0] + C3 + ((bb & dd) | (cc & ^dd)))
-	aa = bits.RotateLeft32(aa, 12) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[13] + C3 + ((aa & cc) | (bb & ^cc)))
-	ee = bits.RotateLeft32(ee, 8) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[5] + C3 + ((ee & bb) | (aa & ^bb)))
-	dd = bits.RotateLeft32(dd, 9) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[10] + C3 + ((dd & aa) | (ee & ^aa)))
-	cc = bits.RotateLeft32(cc, 11) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[14] + C3 + ((cc & ee) | (dd & ^ee)))
-	bb = bits.RotateLeft32(bb, 7) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[15] + C3 + ((bb & dd) | (cc & ^dd)))
-	aa = bits.RotateLeft32(aa, 7) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[8] + C3 + ((aa & cc) | (bb & ^cc)))
-	ee = bits.RotateLeft32(ee, 12) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[12] + C3 + ((ee & bb) | (aa & ^bb)))
-	dd = bits.RotateLeft32(dd, 7) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[4] + C3 + ((dd & aa) | (ee & ^aa)))
-	cc = bits.RotateLeft32(cc, 6) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[9] + C3 + ((cc & ee) | (dd & ^ee)))
-	bb = bits.RotateLeft32(bb, 15) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[1] + C3 + ((bb & dd) | (cc & ^dd)))
-	aa = bits.RotateLeft32(aa, 13) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[2] + C3 + ((aa & cc) | (bb & ^cc)))
-	ee = bits.RotateLeft32(ee, 11) + dd
-	bb = bits.RotateLeft32(bb, 10)
-
-	d = d + (data[3] + C4 + ((e | ^a) ^ b))
-	d = bits.RotateLeft32(d, 11) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[10] + C4 + ((d | ^e) ^ a))
-	c = bits.RotateLeft32(c, 13) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[14] + C4 + ((c | ^d) ^ e))
-	b = bits.RotateLeft32(b, 6) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[4] + C4 + ((b | ^c) ^ d))
-	a = bits.RotateLeft32(a, 7) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[9] + C4 + ((a | ^b) ^ c))
-	e = bits.RotateLeft32(e, 14) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[15] + C4 + ((e | ^a) ^ b))
-	d = bits.RotateLeft32(d, 9) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[8] + C4 + ((d | ^e) ^ a))
-	c = bits.RotateLeft32(c, 13) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[1] + C4 + ((c | ^d) ^ e))
-	b = bits.RotateLeft32(b, 15) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[2] + C4 + ((b | ^c) ^ d))
-	a = bits.RotateLeft32(a, 14) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[7] + C4 + ((a | ^b) ^ c))
-	e = bits.RotateLeft32(e, 8) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[0] + C4 + ((e | ^a) ^ b))
-	d = bits.RotateLeft32(d, 13) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[6] + C4 + ((d | ^e) ^ a))
-	c = bits.RotateLeft32(c, 6) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[13] + C4 + ((c | ^d) ^ e))
-	b = bits.RotateLeft32(b, 5) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[11] + C4 + ((b | ^c) ^ d))
-	a = bits.RotateLeft32(a, 12) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[5] + C4 + ((a | ^b) ^ c))
-	e = bits.RotateLeft32(e, 7) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[12] + C4 + ((e | ^a) ^ b))
-	d = bits.RotateLeft32(d, 5) + c
-	a = bits.RotateLeft32(a, 10)
-
-	dd = dd + (data[15] + C5 + ((ee | ^aa) ^ bb))
-	dd = bits.RotateLeft32(dd, 9) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[5] + C5 + ((dd | ^ee) ^ aa))
-	cc = bits.RotateLeft32(cc, 7) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[1] + C5 + ((cc | ^dd) ^ ee))
-	bb = bits.RotateLeft32(bb, 15) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[3] + C5 + ((bb | ^cc) ^ dd))
-	aa = bits.RotateLeft32(aa, 11) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[7] + C5 + ((aa | ^bb) ^ cc))
-	ee = bits.RotateLeft32(ee, 8) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[14] + C5 + ((ee | ^aa) ^ bb))
-	dd = bits.RotateLeft32(dd, 6) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[6] + C5 + ((dd | ^ee) ^ aa))
-	cc = bits.RotateLeft32(cc, 6) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[9] + C5 + ((cc | ^dd) ^ ee))
-	bb = bits.RotateLeft32(bb, 14) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[11] + C5 + ((bb | ^cc) ^ dd))
-	aa = bits.RotateLeft32(aa, 12) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[8] + C5 + ((aa | ^bb) ^ cc))
-	ee = bits.RotateLeft32(ee, 13) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[12] + C5 + ((ee | ^aa) ^ bb))
-	dd = bits.RotateLeft32(dd, 5) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[2] + C5 + ((dd | ^ee) ^ aa))
-	cc = bits.RotateLeft32(cc, 14) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[10] + C5 + ((cc | ^dd) ^ ee))
-	bb = bits.RotateLeft32(bb, 13) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[0] + C5 + ((bb | ^cc) ^ dd))
-	aa = bits.RotateLeft32(aa, 13) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[4] + C5 + ((aa | ^bb) ^ cc))
-	ee = bits.RotateLeft32(ee, 7) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[13] + C5 + ((ee | ^aa) ^ bb))
-	dd = bits.RotateLeft32(dd, 5) + cc
-	aa = bits.RotateLeft32(aa, 10)
-
-	c = c + (data[1] + C6 + ((d & a) | (e & ^a)))
-	c = bits.RotateLeft32(c, 11) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[9] + C6 + ((c & e) | (d & ^e)))
-	b = bits.RotateLeft32(b, 12) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[11] + C6 + ((b & d) | (c & ^d)))
-	a = bits.RotateLeft32(a, 14) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[10] + C6 + ((a & c) | (b & ^c)))
-	e = bits.RotateLeft32(e, 15) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[0] + C6 + ((e & b) | (a & ^b)))
-	d = bits.RotateLeft32(d, 14) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[8] + C6 + ((d & a) | (e & ^a)))
-	c = bits.RotateLeft32(c, 15) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[12] + C6 + ((c & e) | (d & ^e)))
-	b = bits.RotateLeft32(b, 9) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[4] + C6 + ((b & d) | (c & ^d)))
-	a = bits.RotateLeft32(a, 8) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[13] + C6 + ((a & c) | (b & ^c)))
-	e = bits.RotateLeft32(e, 9) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[3] + C6 + ((e & b) | (a & ^b)))
-	d = bits.RotateLeft32(d, 14) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[7] + C6 + ((d & a) | (e & ^a)))
-	c = bits.RotateLeft32(c, 5) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[15] + C6 + ((c & e) | (d & ^e)))
-	b = bits.RotateLeft32(b, 6) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[14] + C6 + ((b & d) | (c & ^d)))
-	a = bits.RotateLeft32(a, 8) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[5] + C6 + ((a & c) | (b & ^c)))
-	e = bits.RotateLeft32(e, 6) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[6] + C6 + ((e & b) | (a & ^b)))
-	d = bits.RotateLeft32(d, 5) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[2] + C6 + ((d & a) | (e & ^a)))
-	c = bits.RotateLeft32(c, 12) + b
-	e = bits.RotateLeft32(e, 10)
-
-	cc = cc + (data[8] + C7 + ((dd & ee) | (^dd & aa)))
-	cc = bits.RotateLeft32(cc, 15) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[6] + C7 + ((cc & dd) | (^cc & ee)))
-	bb = bits.RotateLeft32(bb, 5) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[4] + C7 + ((bb & cc) | (^bb & dd)))
-	aa = bits.RotateLeft32(aa, 8) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[1] + C7 + ((aa & bb) | (^aa & cc)))
-	ee = bits.RotateLeft32(ee, 11) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[3] + C7 + ((ee & aa) | (^ee & bb)))
-	dd = bits.RotateLeft32(dd, 14) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[11] + C7 + ((dd & ee) | (^dd & aa)))
-	cc = bits.RotateLeft32(cc, 14) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[15] + C7 + ((cc & dd) | (^cc & ee)))
-	bb = bits.RotateLeft32(bb, 6) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[0] + C7 + ((bb & cc) | (^bb & dd)))
-	aa = bits.RotateLeft32(aa, 14) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[5] + C7 + ((aa & bb) | (^aa & cc)))
-	ee = bits.RotateLeft32(ee, 6) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[12] + C7 + ((ee & aa) | (^ee & bb)))
-	dd = bits.RotateLeft32(dd, 9) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[2] + C7 + ((dd & ee) | (^dd & aa)))
-	cc = bits.RotateLeft32(cc, 12) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[13] + C7 + ((cc & dd) | (^cc & ee)))
-	bb = bits.RotateLeft32(bb, 9) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[9] + C7 + ((bb & cc) | (^bb & dd)))
-	aa = bits.RotateLeft32(aa, 12) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[7] + C7 + ((aa & bb) | (^aa & cc)))
-	ee = bits.RotateLeft32(ee, 5) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[10] + C7 + ((ee & aa) | (^ee & bb)))
-	dd = bits.RotateLeft32(dd, 15) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[14] + C7 + ((dd & ee) | (^dd & aa)))
-	cc = bits.RotateLeft32(cc, 8) + bb
-	ee = bits.RotateLeft32(ee, 10)
-
-	b = b + (data[4] + C8 + (c ^ (d | ^e)))
-	b = bits.RotateLeft32(b, 9) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[0] + C8 + (b ^ (c | ^d)))
-	a = bits.RotateLeft32(a, 15) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[5] + C8 + (a ^ (b | ^c)))
-	e = bits.RotateLeft32(e, 5) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[9] + C8 + (e ^ (a | ^b)))
-	d = bits.RotateLeft32(d, 11) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[7] + C8 + (d ^ (e | ^a)))
-	c = bits.RotateLeft32(c, 6) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[12] + C8 + (c ^ (d | ^e)))
-	b = bits.RotateLeft32(b, 8) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[2] + C8 + (b ^ (c | ^d)))
-	a = bits.RotateLeft32(a, 13) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[10] + C8 + (a ^ (b | ^c)))
-	e = bits.RotateLeft32(e, 12) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[14] + C8 + (e ^ (a | ^b)))
-	d = bits.RotateLeft32(d, 5) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[1] + C8 + (d ^ (e | ^a)))
-	c = bits.RotateLeft32(c, 12) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[3] + C8 + (c ^ (d | ^e)))
-	b = bits.RotateLeft32(b, 13) + a
-	d = bits.RotateLeft32(d, 10)
-	a = a + (data[8] + C8 + (b ^ (c | ^d)))
-	a = bits.RotateLeft32(a, 14) + e
-	c = bits.RotateLeft32(c, 10)
-	e = e + (data[11] + C8 + (a ^ (b | ^c)))
-	e = bits.RotateLeft32(e, 11) + d
-	b = bits.RotateLeft32(b, 10)
-	d = d + (data[6] + C8 + (e ^ (a | ^b)))
-	d = bits.RotateLeft32(d, 8) + c
-	a = bits.RotateLeft32(a, 10)
-	c = c + (data[15] + C8 + (d ^ (e | ^a)))
-	c = bits.RotateLeft32(c, 5) + b
-	e = bits.RotateLeft32(e, 10)
-	b = b + (data[13] + C8 + (c ^ (d | ^e)))
-	b = bits.RotateLeft32(b, 6) + a
-	d = bits.RotateLeft32(d, 10)
-
-	bb = bb + (data[12] + (cc ^ dd ^ ee))
-	bb = bits.RotateLeft32(bb, 8) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[15] + (bb ^ cc ^ dd))
-	aa = bits.RotateLeft32(aa, 5) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[10] + (aa ^ bb ^ cc))
-	ee = bits.RotateLeft32(ee, 12) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[4] + (ee ^ aa ^ bb))
-	dd = bits.RotateLeft32(dd, 9) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[1] + (dd ^ ee ^ aa))
-	cc = bits.RotateLeft32(cc, 12) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[5] + (cc ^ dd ^ ee))
-	bb = bits.RotateLeft32(bb, 5) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[8] + (bb ^ cc ^ dd))
-	aa = bits.RotateLeft32(aa, 14) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[7] + (aa ^ bb ^ cc))
-	ee = bits.RotateLeft32(ee, 6) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[6] + (ee ^ aa ^ bb))
-	dd = bits.RotateLeft32(dd, 8) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[2] + (dd ^ ee ^ aa))
-	cc = bits.RotateLeft32(cc, 13) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[13] + (cc ^ dd ^ ee))
-	bb = bits.RotateLeft32(bb, 6) + aa
-	dd = bits.RotateLeft32(dd, 10)
-	aa = aa + (data[14] + (bb ^ cc ^ dd))
-	aa = bits.RotateLeft32(aa, 5) + ee
-	cc = bits.RotateLeft32(cc, 10)
-	ee = ee + (data[0] + (aa ^ bb ^ cc))
-	ee = bits.RotateLeft32(ee, 15) + dd
-	bb = bits.RotateLeft32(bb, 10)
-	dd = dd + (data[3] + (ee ^ aa ^ bb))
-	dd = bits.RotateLeft32(dd, 13) + cc
-	aa = bits.RotateLeft32(aa, 10)
-	cc = cc + (data[9] + (dd ^ ee ^ aa))
-	cc = bits.RotateLeft32(cc, 11) + bb
-	ee = bits.RotateLeft32(ee, 10)
-	bb = bb + (data[11] + (cc ^ dd ^ ee))
-	bb = bits.RotateLeft32(bb, 11) + aa
-	dd = bits.RotateLeft32(dd, 10)
-
-	dd = dd + c + r.state[1]
-	r.state[1] = r.state[2] + d + ee
-	r.state[2] = r.state[3] + e + aa
-	r.state[3] = r.state[4] + a + bb
-	r.state[4] = r.state[0] + b + cc
-	r.state[0] = dd
-
-	var dataBytes []byte
-	dataBytesWritter := iobit.NewWriter(dataBytes)
-	for i:=0; i<len(r.state); i++ {
-		fmt.Println(r.state[i])
-		dataBytesWritter.PutLe32(r.state[i])
-	}
-
-	//fmt.Println(dataBytesWritter.Bytes())
-	dataBytesWritter.Flush()
-	fmt.Println(dataBytesWritter.Bytes())
-	return dataBytes
-}
-
-//func (r *Ripemd160) Final() []byte {
-//	var result = make([]byte, 0)
-//	var addition = make([]byte, 4)
-//	finalReader := iobit.NewReader(r.state)
-//
-//	return result
-//}
-
-func (r *Ripemd160) Finish() (thebits uint64, padindex int32, pad []byte){
-	thebits = r.processed_bytes * 8
-
-	//if r.buffer.Pos < 7 * 8{
-	//	padindex = 56 - r.buffer.Pos
-	//} else{
-	//	padindex = 120 - r.buffer.Pos
-	//}
-//	System.SetLength(pad, padindex + 8)
-//
-	pad[0] = 0x80
-//
-//	bits = TConverters.le2me_64(bits)
-	bitsReader := []byte{}
-	binary.LittleEndian.PutUint64(bitsReader, thebits)
-	thebits, _ = binary.Uvarint(bitsReader)
-//	TConverters.ReadUInt64AsBytesLE(bits, pad, padindex)
-	padReader := iobit.NewReader(pad)
-	thebits = padReader.Le64()
-
-	//padindex = padindex + 8
-	padReader.Skip(8)
-
-	//TransformBytes(pad, 0, padindex)
-
-	return
-}
-
-func (r *Ripemd160)TransformBytes(a_data []byte) []byte {
-	ptr_a_data := a_data[:]
-
-	// a_index => At
-	// a_length => LeftBits
-	adataReader := iobit.NewReader(a_data)
-	//if (not Fm_buffer.IsEmpty) then
-	//begin
-	//	if (Fm_buffer.Feed(ptr_a_data, System.Length(a_data), a_index, a_length,
-	//		Fm_processed_bytes)) then
-	//	begin
-	//	TransformBuffer();
-	//	end;
-	//end;
-
-	//if r.buffer.Len()!=0 {
-	//	l, err := r.buffer.(ptr_a_data)
-	//	if (){
-	//		r.TransformBlock(r.buffer.Bytes())
-	//	}
-	//}
-
-
-	//while (a_length >= (Fm_buffer.Length)) do
-	//begin
-	//	Fm_processed_bytes := Fm_processed_bytes + UInt64(Fm_buffer.Length);
-	//	TransformBlock(ptr_a_data, Fm_buffer.Length, a_index);
-	//	a_index := a_index + (Fm_buffer.Length);
-	//	a_length := a_length - (Fm_buffer.Length);
-	//end;
-
-	for adataReader.LeftBits() > Ripemd160BlockSize {
-		r.processed_bytes = r.processed_bytes + uint64(Ripemd160BlockSize)
-		r.TransformBlock(ptr_a_data)
-		adataReader.Skip(Ripemd160BlockSize)
-	}
-
-	//if (a_length > 0) then
-	//begin
-	//	Fm_buffer.Feed(ptr_a_data, System.Length(a_data), a_index, a_length,
-	//		Fm_processed_bytes);
-	//end;
-
-	return ptr_a_data
-
-//func Create(a_state_length int32, a_hash_size int32){
-//	hash_size = 64
-//	System.SetLength(Fm_state, a_state_length);
-}
-
-//func GetResult() []byte {
-//	System.SetLength(result, System.Length(Fm_state) * System.SizeOf(UInt32));
-//
-//	TConverters.le32_copy(PCardinal(Fm_state), 0, PByte(result), 0, System.Length(result));
-//	return result
-//}
-
-//func Clone() (HashInstance *Ripemd160) {
-//	HashInstance = Create()
-//	HashInstance.Fm_state := System.Copy(Fm_state);
-//	HashInstance.Fm_buffer := Fm_buffer.Clone();
-//	HashInstance.Fm_processed_bytes := Fm_processed_bytes;
-//	result := HashInstance as IHash;
-//	result.BufferSize := BufferSize;
-//}
-
-//func (r *Ripemd160) TransformFinal() {
-//	r.Finish()
-//	//tempresult := GetResult();
-//	//result :=  r.GetResult()
-//	r.Initialize()
-//	return result
-//}
-
-func (r *Ripemd160) ComputeBytes(in []byte) []byte {
-	r.Initialize() // Initialize();
-	r.TransformBytes(in)
-	// result := THashResult.Create(tempresult);
-	//r.TransformBlock(in)
-
-	var result =  []byte{}
-	addition:= make([]byte, 8)
-	//var addition []byte
-
-	for i:=0; i<len(r.state); i++ {
-		fmt.Println(r.state[i])
-		binary.LittleEndian.PutUint32(addition, r.state[i])
-		result = bytes.Join([][]byte{result, addition}, nil)
-	}
-
+// BYTES_TO_DWORD
+func bytes2uint64(b []byte) uint64 {
+	result, _ := binary.Uvarint(b)
 	return result
 }
+
+func byte2uint64(b byte) uint64 {
+	result, _ := binary.Uvarint([]byte{b})
+	return result
+}
+
+func MDinit() []uint64 {
+	var MDbuf []uint64
+	MDbuf = append(MDbuf, 0x67452301)
+	MDbuf = append(MDbuf, 0xefcdab89)
+	MDbuf = append(MDbuf, 0x98badcfe)
+	MDbuf = append(MDbuf, 0x10325476)
+	MDbuf = append(MDbuf, 0xc3d2e1f0)
+	return MDbuf
+}
+
+func FF(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	a += ((b) ^ (c) ^ (d)) + (x)
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func GG(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	a += (((b) & (c)) | (^b & (d))) + (x) + 0x5a827999
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func HH(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	(a) += (((b) | (^c)) ^ (d)) + (x) + 0x6ed9eba1
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func II(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	a += (((b) & (d)) | ((c) & (^d))) + (x) + 0x8f1bbcdc
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func JJ(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	a += ((b) ^ ((c) | (^d))) + (x) + 0xa953fd4e
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func FFF(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	return FF(a, b, c, d, e, x, s)
+}
+
+func GGG(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	a += (((b) & (c)) | (^b & (d))) + (x) + 0x7a6d76e9
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func HHH(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	(a) += (((b) | (^c)) ^ (d)) + (x) + 0x6d703ef3
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func III(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	a += (((b) & (d)) | ((c) & (^d))) + (x) + 0x5c4dd124
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func JJJ(a, b, c, d, e, x, s uint64) (aa, bb, cc, dd, ee, xx, ss uint64) {
+	a += ((b) ^ ((c) | (^d))) + (x) + 0x50a28be6
+	a = (((a) << (s)) | ((a) >> (32 - (s)))) + (e)
+	c = ((c) << (10)) | ((c) >> (32 - (10)))
+	return a, b, c, d, e, x, s
+}
+
+func Rounds(MDbuf []uint64, X [16]uint64) []uint64 {
+	aa := MDbuf[0]
+	bb := MDbuf[1]
+	cc := MDbuf[2]
+	dd := MDbuf[3]
+	ee := MDbuf[4]
+
+	aaa := MDbuf[0]
+	bbb := MDbuf[1]
+	ccc := MDbuf[2]
+	ddd := MDbuf[3]
+	eee := MDbuf[4]
+
+	/* round 1 */
+	aa, bb, cc, dd, ee, X[0], _ = FF(aa, bb, cc, dd, ee, X[0], 11)
+	ee, aa, bb, cc, dd, X[1], _ = FF(ee, aa, bb, cc, dd, X[1], 14)
+	dd, ee, aa, bb, cc, X[2], _ = FF(dd, ee, aa, bb, cc, X[2], 15)
+	cc, dd, ee, aa, bb, X[3], _ = FF(cc, dd, ee, aa, bb, X[3], 12)
+	bb, cc, dd, ee, aa, X[4], _ = FF(bb, cc, dd, ee, aa, X[4], 5)
+	aa, bb, cc, dd, ee, X[5], _ = FF(aa, bb, cc, dd, ee, X[5], 8)
+	ee, aa, bb, cc, dd, X[6], _ = FF(ee, aa, bb, cc, dd, X[6], 7)
+	dd, ee, aa, bb, cc, X[7], _ = FF(dd, ee, aa, bb, cc, X[7], 9)
+	cc, dd, ee, aa, bb, X[8], _ = FF(cc, dd, ee, aa, bb, X[8], 11)
+	bb, cc, dd, ee, aa, X[9], _ = FF(bb, cc, dd, ee, aa, X[9], 13)
+	aa, bb, cc, dd, ee, X[10], _ = FF(aa, bb, cc, dd, ee, X[10], 14)
+	ee, aa, bb, cc, dd, X[11], _ = FF(ee, aa, bb, cc, dd, X[11], 15)
+	dd, ee, aa, bb, cc, X[12], _ = FF(dd, ee, aa, bb, cc, X[12], 6)
+	cc, dd, ee, aa, bb, X[13], _ = FF(cc, dd, ee, aa, bb, X[13], 7)
+	bb, cc, dd, ee, aa, X[14], _ = FF(bb, cc, dd, ee, aa, X[14], 9)
+	aa, bb, cc, dd, ee, X[15], _ = FF(aa, bb, cc, dd, ee, X[15], 8)
+
+	/* round 2 */
+	ee, aa, bb, cc, dd, X[7], _ = GG(ee, aa, bb, cc, dd, X[7], 7)
+	dd, ee, aa, bb, cc, X[4], _ = GG(dd, ee, aa, bb, cc, X[4], 6)
+	cc, dd, ee, aa, bb, X[13], _ = GG(cc, dd, ee, aa, bb, X[13], 8)
+	bb, cc, dd, ee, aa, X[1], _ = GG(bb, cc, dd, ee, aa, X[1], 13)
+	aa, bb, cc, dd, ee, X[10], _ = GG(aa, bb, cc, dd, ee, X[10], 11)
+	ee, aa, bb, cc, dd, X[6], _ = GG(ee, aa, bb, cc, dd, X[6], 9)
+	dd, ee, aa, bb, cc, X[15], _ = GG(dd, ee, aa, bb, cc, X[15], 7)
+	cc, dd, ee, aa, bb, X[3], _ = GG(cc, dd, ee, aa, bb, X[3], 15)
+	bb, cc, dd, ee, aa, X[12], _ = GG(bb, cc, dd, ee, aa, X[12], 7)
+	aa, bb, cc, dd, ee, X[0], _ = GG(aa, bb, cc, dd, ee, X[0], 12)
+	ee, aa, bb, cc, dd, X[9], _ = GG(ee, aa, bb, cc, dd, X[9], 15)
+	dd, ee, aa, bb, cc, X[5], _ = GG(dd, ee, aa, bb, cc, X[5], 9)
+	cc, dd, ee, aa, bb, X[2], _ = GG(cc, dd, ee, aa, bb, X[2], 11)
+	bb, cc, dd, ee, aa, X[14], _ = GG(bb, cc, dd, ee, aa, X[14], 7)
+	aa, bb, cc, dd, ee, X[11], _ = GG(aa, bb, cc, dd, ee, X[11], 13)
+	ee, aa, bb, cc, dd, X[8], _ = GG(ee, aa, bb, cc, dd, X[8], 12)
+
+	/* round 3 */
+	dd, ee, aa, bb, cc, X[3], _ = HH(dd, ee, aa, bb, cc, X[3], 11)
+	cc, dd, ee, aa, bb, X[10], _ = HH(cc, dd, ee, aa, bb, X[10], 13)
+	bb, cc, dd, ee, aa, X[14], _ = HH(bb, cc, dd, ee, aa, X[14], 6)
+	aa, bb, cc, dd, ee, X[4], _ = HH(aa, bb, cc, dd, ee, X[4], 7)
+	ee, aa, bb, cc, dd, X[9], _ = HH(ee, aa, bb, cc, dd, X[9], 14)
+	dd, ee, aa, bb, cc, X[15], _ = HH(dd, ee, aa, bb, cc, X[15], 9)
+	cc, dd, ee, aa, bb, X[8], _ = HH(cc, dd, ee, aa, bb, X[8], 13)
+	bb, cc, dd, ee, aa, X[1], _ = HH(bb, cc, dd, ee, aa, X[1], 15)
+	aa, bb, cc, dd, ee, X[2], _ = HH(aa, bb, cc, dd, ee, X[2], 14)
+	ee, aa, bb, cc, dd, X[7], _ = HH(ee, aa, bb, cc, dd, X[7], 8)
+	dd, ee, aa, bb, cc, X[0], _ = HH(dd, ee, aa, bb, cc, X[0], 13)
+	cc, dd, ee, aa, bb, X[6], _ = HH(cc, dd, ee, aa, bb, X[6], 6)
+	bb, cc, dd, ee, aa, X[13], _ = HH(bb, cc, dd, ee, aa, X[13], 5)
+	aa, bb, cc, dd, ee, X[11], _ = HH(aa, bb, cc, dd, ee, X[11], 12)
+	ee, aa, bb, cc, dd, X[5], _ = HH(ee, aa, bb, cc, dd, X[5], 7)
+	dd, ee, aa, bb, cc, X[12], _ = HH(dd, ee, aa, bb, cc, X[12], 5)
+
+	/* round 4 */
+	cc, dd, ee, aa, bb, X[1], _ = II(cc, dd, ee, aa, bb, X[1], 11)
+	bb, cc, dd, ee, aa, X[9], _ = II(bb, cc, dd, ee, aa, X[9], 12)
+	aa, bb, cc, dd, ee, X[11], _ = II(aa, bb, cc, dd, ee, X[11], 14)
+	ee, aa, bb, cc, dd, X[10], _ = II(ee, aa, bb, cc, dd, X[10], 15)
+	dd, ee, aa, bb, cc, X[0], _ = II(dd, ee, aa, bb, cc, X[0], 14)
+	cc, dd, ee, aa, bb, X[8], _ = II(cc, dd, ee, aa, bb, X[8], 15)
+	bb, cc, dd, ee, aa, X[12], _ = II(bb, cc, dd, ee, aa, X[12], 9)
+	aa, bb, cc, dd, ee, X[4], _ = II(aa, bb, cc, dd, ee, X[4], 8)
+	ee, aa, bb, cc, dd, X[13], _ = II(ee, aa, bb, cc, dd, X[13], 9)
+	dd, ee, aa, bb, cc, X[3], _ = II(dd, ee, aa, bb, cc, X[3], 14)
+	cc, dd, ee, aa, bb, X[7], _ = II(cc, dd, ee, aa, bb, X[7], 5)
+	bb, cc, dd, ee, aa, X[15], _ = II(bb, cc, dd, ee, aa, X[15], 6)
+	aa, bb, cc, dd, ee, X[14], _ = II(aa, bb, cc, dd, ee, X[14], 8)
+	ee, aa, bb, cc, dd, X[5], _ = II(ee, aa, bb, cc, dd, X[5], 6)
+	dd, ee, aa, bb, cc, X[6], _ = II(dd, ee, aa, bb, cc, X[6], 5)
+	cc, dd, ee, aa, bb, X[2], _ = II(cc, dd, ee, aa, bb, X[2], 12)
+
+	/* round 5 */
+	bb, cc, dd, ee, aa, X[4], _ = JJ(bb, cc, dd, ee, aa, X[4], 9)
+	aa, bb, cc, dd, ee, X[0], _ = JJ(aa, bb, cc, dd, ee, X[0], 15)
+	ee, aa, bb, cc, dd, X[5], _ = JJ(ee, aa, bb, cc, dd, X[5], 5)
+	dd, ee, aa, bb, cc, X[9], _ = JJ(dd, ee, aa, bb, cc, X[9], 11)
+	cc, dd, ee, aa, bb, X[7], _ = JJ(cc, dd, ee, aa, bb, X[7], 6)
+	bb, cc, dd, ee, aa, X[12], _ = JJ(bb, cc, dd, ee, aa, X[12], 8)
+	aa, bb, cc, dd, ee, X[2], _ = JJ(aa, bb, cc, dd, ee, X[2], 13)
+	ee, aa, bb, cc, dd, X[10], _ = JJ(ee, aa, bb, cc, dd, X[10], 12)
+	dd, ee, aa, bb, cc, X[14], _ = JJ(dd, ee, aa, bb, cc, X[14], 5)
+	cc, dd, ee, aa, bb, X[1], _ = JJ(cc, dd, ee, aa, bb, X[1], 12)
+	bb, cc, dd, ee, aa, X[3], _ = JJ(bb, cc, dd, ee, aa, X[3], 13)
+	aa, bb, cc, dd, ee, X[8], _ = JJ(aa, bb, cc, dd, ee, X[8], 14)
+	ee, aa, bb, cc, dd, X[11], _ = JJ(ee, aa, bb, cc, dd, X[11], 11)
+	dd, ee, aa, bb, cc, X[6], _ = JJ(dd, ee, aa, bb, cc, X[6], 8)
+	cc, dd, ee, aa, bb, X[15], _ = JJ(cc, dd, ee, aa, bb, X[15], 5)
+	bb, cc, dd, ee, aa, X[13], _ = JJ(bb, cc, dd, ee, aa, X[13], 6)
+
+	/* parallel round 1 */
+	aaa, bbb, ccc, ddd, eee, X[5], _ = JJJ(aaa, bbb, ccc, ddd, eee, X[5], 8)
+	eee, aaa, bbb, ccc, ddd, X[14], _ = JJJ(eee, aaa, bbb, ccc, ddd, X[14], 9)
+	ddd, eee, aaa, bbb, ccc, X[7], _ = JJJ(ddd, eee, aaa, bbb, ccc, X[7], 9)
+	ccc, ddd, eee, aaa, bbb, X[0], _ = JJJ(ccc, ddd, eee, aaa, bbb, X[0], 11)
+	bbb, ccc, ddd, eee, aaa, X[9], _ = JJJ(bbb, ccc, ddd, eee, aaa, X[9], 13)
+	aaa, bbb, ccc, ddd, eee, X[2], _ = JJJ(aaa, bbb, ccc, ddd, eee, X[2], 15)
+	eee, aaa, bbb, ccc, ddd, X[11], _ = JJJ(eee, aaa, bbb, ccc, ddd, X[11], 15)
+	ddd, eee, aaa, bbb, ccc, X[4], _ = JJJ(ddd, eee, aaa, bbb, ccc, X[4], 5)
+	ccc, ddd, eee, aaa, bbb, X[13], _ = JJJ(ccc, ddd, eee, aaa, bbb, X[13], 7)
+	bbb, ccc, ddd, eee, aaa, X[6], _ = JJJ(bbb, ccc, ddd, eee, aaa, X[6], 7)
+	aaa, bbb, ccc, ddd, eee, X[15], _ = JJJ(aaa, bbb, ccc, ddd, eee, X[15], 8)
+	eee, aaa, bbb, ccc, ddd, X[8], _ = JJJ(eee, aaa, bbb, ccc, ddd, X[8], 11)
+	ddd, eee, aaa, bbb, ccc, X[1], _ = JJJ(ddd, eee, aaa, bbb, ccc, X[1], 14)
+	ccc, ddd, eee, aaa, bbb, X[10], _ = JJJ(ccc, ddd, eee, aaa, bbb, X[10], 14)
+	bbb, ccc, ddd, eee, aaa, X[3], _ = JJJ(bbb, ccc, ddd, eee, aaa, X[3], 12)
+	aaa, bbb, ccc, ddd, eee, X[12], _ = JJJ(aaa, bbb, ccc, ddd, eee, X[12], 6)
+
+	/* parallel round 2 */
+	eee, aaa, bbb, ccc, ddd, X[6], _ = III(eee, aaa, bbb, ccc, ddd, X[6], 9)
+	ddd, eee, aaa, bbb, ccc, X[11], _ = III(ddd, eee, aaa, bbb, ccc, X[11], 13)
+	ccc, ddd, eee, aaa, bbb, X[3], _ = III(ccc, ddd, eee, aaa, bbb, X[3], 15)
+	bbb, ccc, ddd, eee, aaa, X[7], _ = III(bbb, ccc, ddd, eee, aaa, X[7], 7)
+	aaa, bbb, ccc, ddd, eee, X[0], _ = III(aaa, bbb, ccc, ddd, eee, X[0], 12)
+	eee, aaa, bbb, ccc, ddd, X[13], _ = III(eee, aaa, bbb, ccc, ddd, X[13], 8)
+	ddd, eee, aaa, bbb, ccc, X[5], _ = III(ddd, eee, aaa, bbb, ccc, X[5], 9)
+	ccc, ddd, eee, aaa, bbb, X[10], _ = III(ccc, ddd, eee, aaa, bbb, X[10], 11)
+	bbb, ccc, ddd, eee, aaa, X[14], _ = III(bbb, ccc, ddd, eee, aaa, X[14], 7)
+	aaa, bbb, ccc, ddd, eee, X[15], _ = III(aaa, bbb, ccc, ddd, eee, X[15], 7)
+	eee, aaa, bbb, ccc, ddd, X[8], _ = III(eee, aaa, bbb, ccc, ddd, X[8], 12)
+	ddd, eee, aaa, bbb, ccc, X[12], _ = III(ddd, eee, aaa, bbb, ccc, X[12], 7)
+	ccc, ddd, eee, aaa, bbb, X[4], _ = III(ccc, ddd, eee, aaa, bbb, X[4], 6)
+	bbb, ccc, ddd, eee, aaa, X[9], _ = III(bbb, ccc, ddd, eee, aaa, X[9], 15)
+	aaa, bbb, ccc, ddd, eee, X[1], _ = III(aaa, bbb, ccc, ddd, eee, X[1], 13)
+	eee, aaa, bbb, ccc, ddd, X[2], _ = III(eee, aaa, bbb, ccc, ddd, X[2], 11)
+
+	/* parallel round 3 */
+	ddd, eee, aaa, bbb, ccc, X[15], _ = HHH(ddd, eee, aaa, bbb, ccc, X[15], 9)
+	ccc, ddd, eee, aaa, bbb, X[5], _ = HHH(ccc, ddd, eee, aaa, bbb, X[5], 7)
+	bbb, ccc, ddd, eee, aaa, X[1], _ = HHH(bbb, ccc, ddd, eee, aaa, X[1], 15)
+	aaa, bbb, ccc, ddd, eee, X[3], _ = HHH(aaa, bbb, ccc, ddd, eee, X[3], 11)
+	eee, aaa, bbb, ccc, ddd, X[7], _ = HHH(eee, aaa, bbb, ccc, ddd, X[7], 8)
+	ddd, eee, aaa, bbb, ccc, X[14], _ = HHH(ddd, eee, aaa, bbb, ccc, X[14], 6)
+	ccc, ddd, eee, aaa, bbb, X[6], _ = HHH(ccc, ddd, eee, aaa, bbb, X[6], 6)
+	bbb, ccc, ddd, eee, aaa, X[9], _ = HHH(bbb, ccc, ddd, eee, aaa, X[9], 14)
+	aaa, bbb, ccc, ddd, eee, X[11], _ = HHH(aaa, bbb, ccc, ddd, eee, X[11], 12)
+	eee, aaa, bbb, ccc, ddd, X[8], _ = HHH(eee, aaa, bbb, ccc, ddd, X[8], 13)
+	ddd, eee, aaa, bbb, ccc, X[12], _ = HHH(ddd, eee, aaa, bbb, ccc, X[12], 5)
+	ccc, ddd, eee, aaa, bbb, X[2], _ = HHH(ccc, ddd, eee, aaa, bbb, X[2], 14)
+	bbb, ccc, ddd, eee, aaa, X[10], _ = HHH(bbb, ccc, ddd, eee, aaa, X[10], 13)
+	aaa, bbb, ccc, ddd, eee, X[0], _ = HHH(aaa, bbb, ccc, ddd, eee, X[0], 13)
+	eee, aaa, bbb, ccc, ddd, X[4], _ = HHH(eee, aaa, bbb, ccc, ddd, X[4], 7)
+	ddd, eee, aaa, bbb, ccc, X[13], _ = HHH(ddd, eee, aaa, bbb, ccc, X[13], 5)
+
+	/* parallel round 4 */
+	ccc, ddd, eee, aaa, bbb, X[8], _ = GGG(ccc, ddd, eee, aaa, bbb, X[8], 15)
+	bbb, ccc, ddd, eee, aaa, X[6], _ = GGG(bbb, ccc, ddd, eee, aaa, X[6], 5)
+	aaa, bbb, ccc, ddd, eee, X[4], _ = GGG(aaa, bbb, ccc, ddd, eee, X[4], 8)
+	eee, aaa, bbb, ccc, ddd, X[1], _ = GGG(eee, aaa, bbb, ccc, ddd, X[1], 11)
+	ddd, eee, aaa, bbb, ccc, X[3], _ = GGG(ddd, eee, aaa, bbb, ccc, X[3], 14)
+	ccc, ddd, eee, aaa, bbb, X[11], _ = GGG(ccc, ddd, eee, aaa, bbb, X[11], 14)
+	bbb, ccc, ddd, eee, aaa, X[15], _ = GGG(bbb, ccc, ddd, eee, aaa, X[15], 6)
+	aaa, bbb, ccc, ddd, eee, X[0], _ = GGG(aaa, bbb, ccc, ddd, eee, X[0], 14)
+	eee, aaa, bbb, ccc, ddd, X[5], _ = GGG(eee, aaa, bbb, ccc, ddd, X[5], 6)
+	ddd, eee, aaa, bbb, ccc, X[12], _ = GGG(ddd, eee, aaa, bbb, ccc, X[12], 9)
+	ccc, ddd, eee, aaa, bbb, X[2], _ = GGG(ccc, ddd, eee, aaa, bbb, X[2], 12)
+	bbb, ccc, ddd, eee, aaa, X[13], _ = GGG(bbb, ccc, ddd, eee, aaa, X[13], 9)
+	aaa, bbb, ccc, ddd, eee, X[9], _ = GGG(aaa, bbb, ccc, ddd, eee, X[9], 12)
+	eee, aaa, bbb, ccc, ddd, X[7], _ = GGG(eee, aaa, bbb, ccc, ddd, X[7], 5)
+	ddd, eee, aaa, bbb, ccc, X[10], _ = GGG(ddd, eee, aaa, bbb, ccc, X[10], 15)
+	ccc, ddd, eee, aaa, bbb, X[14], _ = GGG(ccc, ddd, eee, aaa, bbb, X[14], 8)
+
+	/* parallel round 5 */
+	bbb, ccc, ddd, eee, aaa, X[12], _ = FFF(bbb, ccc, ddd, eee, aaa, X[12], 8)
+	aaa, bbb, ccc, ddd, eee, X[15], _ = FFF(aaa, bbb, ccc, ddd, eee, X[15], 5)
+	eee, aaa, bbb, ccc, ddd, X[10], _ = FFF(eee, aaa, bbb, ccc, ddd, X[10], 12)
+	ddd, eee, aaa, bbb, ccc, X[4], _ = FFF(ddd, eee, aaa, bbb, ccc, X[4], 9)
+	ccc, ddd, eee, aaa, bbb, X[1], _ = FFF(ccc, ddd, eee, aaa, bbb, X[1], 12)
+	bbb, ccc, ddd, eee, aaa, X[5], _ = FFF(bbb, ccc, ddd, eee, aaa, X[5], 5)
+	aaa, bbb, ccc, ddd, eee, X[8], _ = FFF(aaa, bbb, ccc, ddd, eee, X[8], 14)
+	eee, aaa, bbb, ccc, ddd, X[7], _ = FFF(eee, aaa, bbb, ccc, ddd, X[7], 6)
+	ddd, eee, aaa, bbb, ccc, X[6], _ = FFF(ddd, eee, aaa, bbb, ccc, X[6], 8)
+	ccc, ddd, eee, aaa, bbb, X[2], _ = FFF(ccc, ddd, eee, aaa, bbb, X[2], 13)
+	bbb, ccc, ddd, eee, aaa, X[13], _ = FFF(bbb, ccc, ddd, eee, aaa, X[13], 6)
+	aaa, bbb, ccc, ddd, eee, X[14], _ = FFF(aaa, bbb, ccc, ddd, eee, X[14], 5)
+	eee, aaa, bbb, ccc, ddd, X[0], _ = FFF(eee, aaa, bbb, ccc, ddd, X[0], 15)
+	ddd, eee, aaa, bbb, ccc, X[3], _ = FFF(ddd, eee, aaa, bbb, ccc, X[3], 13)
+	ccc, ddd, eee, aaa, bbb, X[9], _ = FFF(ccc, ddd, eee, aaa, bbb, X[9], 11)
+	bbb, ccc, ddd, eee, aaa, X[11], _ = FFF(bbb, ccc, ddd, eee, aaa, X[11], 11)
+
+	/* combine results */
+	ddd += cc + MDbuf[1] /* final result for MDbuf[0] */
+	MDbuf[1] = MDbuf[2] + dd + eee
+	MDbuf[2] = MDbuf[3] + ee + aaa
+	MDbuf[3] = MDbuf[4] + aa + bbb
+	MDbuf[4] = MDbuf[0] + bb + ccc
+	MDbuf[0] = ddd
+
+	return MDbuf
+}
+
+func MDfinish(MDbuf []uint64, strptr *bytes.Buffer, lswlen, mswlen uint64) []byte {
+	//var i uint                                 /* counter       */
+	var X [16]uint64 /* message words */
+	for i := uint64(0); i < (lswlen & 63); i++ {
+		/* byte i goes into word X[i div 4] at pos.  8*(i mod 4)  */
+		b, err := strptr.ReadByte()
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+
+		X[i>>2] ^= byte2uint64(b) << (8 * (i & 3))
+	}
+
+	/* append the bit m_n == 1 */
+	X[(lswlen>>2)&15] ^= 1 << (8*(lswlen&3) + 7)
+
+	if (lswlen & 63) > 55 {
+		/* length goes to next block */
+		Rounds(MDbuf, X)
+	}
+
+	/* append length in bits*/
+	X[14] = lswlen << 3
+	X[15] = (lswlen >> 29) | (mswlen << 3)
+	r := Rounds(MDbuf, X)
+
+	data := make([]byte, 0)
+
+	for _, i := range r {
+		add64 := make([]byte, 8)
+		fmt.Println(i)
+		binary.LittleEndian.PutUint64(add64, i)
+		data = bytes.Join([][]byte{data, add64}, nil)
+	}
+	return data
+}
+
+//func (r *Ripemd160) TransformBlock(in []byte) []byte {
+
+//}
+
+//func (r *Ripemd160) ComputeBytes(in []byte) []byte {
+//	r.Initialize() // Initialize();
+//	r.TransformBytes(in)
+//	// result := THashResult.Create(tempresult);
+//	//r.TransformBlock(in)
+//
+//	var result =  []byte{}
+//	addition:= make([]byte, 8)
+//	//var addition []byte
+//
+//	for i:=0; i<len(r.state); i++ {
+//		fmt.Println(r.state[i])
+//		binary.LittleEndian.PutUint32(addition, r.state[i])
+//		result = bytes.Join([][]byte{result, addition}, nil)
+//	}
+//
+//	return result
+//}
