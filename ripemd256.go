@@ -167,7 +167,7 @@ func New256() *ripemd256digest {
 }
 
 func (r *ripemd256digest) Reset() {
-	r.s[0], r.s[1], r.s[2], r.s[3], r.s[4], r.s[5], r.s[6], r.s[7] = _s0, _s1, _s2, _s3, _s4, _s5, _s6, _s7
+	r.s[0], r.s[1], r.s[2], r.s[3], r.s[4], r.s[5], r.s[6], r.s[7] = _s0, _s1, _s2, _s3, 0x76543210, 0xfedcba98, 0x89abcdef, 0x01234567
 	r.nx = 0
 	r.tc = 0
 }
