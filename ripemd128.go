@@ -7,7 +7,7 @@ const (
 	Size128 = 16
 
 	// The block size of the hash algorithm in bytes.
-	BlockSize128 = 32
+	BlockSize128 = 64
 )
 
 // work buffer indices and roll amounts for one line
@@ -48,8 +48,8 @@ func _Block128(md *ripemd128digest, p []byte) int {
 		aa, bb, cc, dd := a, b, c, d
 		j := 0
 		for i := 0; i < 16; i++ {
-			x[i] = uint32(p[j]) | uint32(p[j+1])<<8 //| uint32(p[j+2])<<16 | uint32(p[j+3])<<24
-			j += 2
+			x[i] = uint32(p[j]) | uint32(p[j+1])<<8 | uint32(p[j+2])<<16 | uint32(p[j+3])<<24
+			j += 4
 		}
 
 		// round 1
@@ -61,17 +61,17 @@ func _Block128(md *ripemd128digest, p []byte) int {
 			a, b, c, d = d, alpha, b, c
 
 			// parallel line
-			alpha = aa + (cc ^ (dd & (bb^cc))) + x[_128n1[i]] + 0x50a28be6
+			alpha = aa + (cc ^ (dd & (bb ^ cc))) + x[_128n1[i]] + 0x50a28be6
 			s = int(_128r1[i])
 			alpha = bits.RotateLeft32(alpha, s)
-			aa, bb, cc, dd= dd, alpha, bb, cc
+			aa, bb, cc, dd = dd, alpha, bb, cc
 
 			i++
 		}
 
 		// round 2
 		for i < 32 {
-			alpha = a + (d ^ (b & (c^d))) + x[_128n0[i]] + 0x5a827999
+			alpha = a + (d ^ (b & (c ^ d))) + x[_128n0[i]] + 0x5a827999
 			s := int(_128r0[i])
 			alpha = bits.RotateLeft32(alpha, s)
 			a, b, c, d = d, alpha, b, c
@@ -93,7 +93,7 @@ func _Block128(md *ripemd128digest, p []byte) int {
 			a, b, c, d = d, alpha, b, c
 
 			// parallel line
-			alpha = aa + (dd ^ (bb & (cc^dd))) + x[_128n1[i]] + 0x6d703ef3
+			alpha = aa + (dd ^ (bb & (cc ^ dd))) + x[_128n1[i]] + 0x6d703ef3
 			s = int(_128r1[i])
 			alpha = bits.RotateLeft32(alpha, s)
 			aa, bb, cc, dd = dd, alpha, bb, cc
@@ -103,7 +103,7 @@ func _Block128(md *ripemd128digest, p []byte) int {
 
 		// round 4
 		for i < 64 {
-			alpha = a + (c ^ (d & (b^c))) + x[_128n0[i]] + 0x8f1bbcdc
+			alpha = a + (c ^ (d & (b ^ c))) + x[_128n0[i]] + 0x8f1bbcdc
 			s := int(_128r0[i])
 			alpha = bits.RotateLeft32(alpha, s)
 			a, b, c, d = d, alpha, b, c
@@ -118,7 +118,7 @@ func _Block128(md *ripemd128digest, p []byte) int {
 		}
 
 		// combine results
-		c       = md.s[1] + c + dd
+		c = md.s[1] + c + dd
 		md.s[1] = md.s[2] + d + aa
 		md.s[2] = md.s[3] + a + bb
 		md.s[3] = md.s[0] + b + cc
@@ -156,7 +156,6 @@ func (r *ripemd128digest) Size() int {
 func (r *ripemd128digest) BlockSize() int {
 	return BlockSize128
 }
-
 
 func (d *ripemd128digest) Write(p []byte) (nn int, err error) {
 	nn = len(p)
