@@ -1,6 +1,7 @@
 package ripemd
 
 import (
+	"hash"
 	"math/bits"
 )
 
@@ -195,7 +196,7 @@ type ripemd320digest struct {
 	tc uint64             // total count of bytes processed
 }
 
-func New320() *ripemd320digest {
+func New320() hash.Hash {
 	r := new(ripemd320digest)
 	r.Reset()
 	return r

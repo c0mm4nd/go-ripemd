@@ -1,6 +1,9 @@
 package ripemd
 
-import "math/bits"
+import (
+	"hash"
+	"math/bits"
+)
 
 const (
 	// The size of the checksum in bytes.
@@ -137,7 +140,7 @@ type ripemd128digest struct {
 	tc uint64             // total count of bytes processed
 }
 
-func New128() *ripemd128digest {
+func New128() hash.Hash {
 	r := new(ripemd128digest)
 	r.Reset()
 	return r

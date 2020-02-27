@@ -1,6 +1,7 @@
 package ripemd
 
 import (
+	"hash"
 	"math/bits"
 )
 
@@ -12,7 +13,6 @@ const (
 	BlockSize256 = 64
 )
 
-// numbers from https://homes.esat.kuleuven.be/~bosselae/ripemd/rmd256.txt
 // work buffer indices and roll amounts for one line
 var _256n0 = [64]uint{
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
@@ -160,14 +160,14 @@ type ripemd256digest struct {
 	tc uint64             // total count of bytes processed
 }
 
-func New256() *ripemd256digest {
+func New256() hash.Hash {
 	r := new(ripemd256digest)
 	r.Reset()
 	return r
 }
 
 func (r *ripemd256digest) Reset() {
-	r.s[0], r.s[1], r.s[2], r.s[3], r.s[4], r.s[5], r.s[6], r.s[7] = _s0, _s1, _s2, _s3, 0x76543210, 0xfedcba98, 0x89abcdef, 0x01234567
+	r.s[0], r.s[1], r.s[2], r.s[3], r.s[4], r.s[5], r.s[6], r.s[7] = _s0, _s1, _s2, _s3, _s5, _s6, _s7, _s8
 	r.nx = 0
 	r.tc = 0
 }
